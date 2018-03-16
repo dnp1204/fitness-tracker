@@ -7,7 +7,7 @@ import { AngularFireModule } from 'angularfire2';
 import { environment } from '../environments/environment';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-import { AuthModule } from './auth/auth.model';
+import { AuthModule } from './auth/auth.module';
 import { AuthService } from './auth/auth.service';
 import { MaterialModule } from './material.module';
 import { HeaderComponent } from './navigation/header/header.component';
