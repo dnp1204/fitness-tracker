@@ -7,14 +7,13 @@ import { Subject } from 'rxjs/Subject';
 import * as UI from '../shared/ui.actions';
 import { UIService } from '../shared/ui.service';
 import { TrainingService } from '../training/training.service';
-import { State } from './../app.reducer';
 import * as fromRoot from './../app.reducer';
+import { State } from './../app.reducer';
 import { AuthData } from './auth-data.model';
+import * as Auth from './auth.actions';
 
 @Injectable()
 export class AuthService {
-  authChange = new Subject<boolean>();
-  private isAuthenticated = false;
 
   constructor(
     private router: Router,
@@ -27,36 +26,30 @@ export class AuthService {
   initAuthListener() {
     this.auth.authState.subscribe(user => {
       if (user) {
-        this.isAuthenticated = true;
-        this.authChange.next(true);
+        this.store.dispatch(new Auth.SetAuthenticated());
         this.router.navigate(['/training']);
       } else {
+        this.store.dispatch(new Auth.SetUnauthenticated());
         this.trainingService.cancelSubscription();
-        this.authChange.next(false);
-        this.isAuthenticated = false;
         this.router.navigate(['/login']);
       }
     });
   }
 
   registerUser(authData: AuthData) {
-    // this.uiService.loadingStateChanged.next(true);
     this.store.dispatch(new UI.StartLoading);
     this.auth.auth
       .createUserWithEmailAndPassword(authData.email, authData.password)
       .then(result => {
-        // this.uiService.loadingStateChanged.next(false);
         this.store.dispatch(new UI.StopLoading);
       })
       .catch(err => {
-        // this.uiService.loadingStateChanged.next(false);
         this.store.dispatch(new UI.StopLoading);
         this.uiService.showSnackBar(err.message, null, 3000);
       });
   }
 
   login(authData: AuthData) {
-    // this.uiService.loadingStateChanged.next(true);
     this.store.dispatch(new UI.StartLoading);
     this.auth.auth
       .signInWithEmailAndPassword(authData.email, authData.password)
@@ -73,9 +66,5 @@ export class AuthService {
 
   logout() {
     this.auth.auth.signOut();
-  }
-
-  isAuth() {
-    return this.isAuthenticated;
   }
 }
